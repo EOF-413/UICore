@@ -8,7 +8,7 @@ from PyQt5.QtGui import QIcon
 
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-    QLabel, QSystemTrayIcon, QMenu, QAction, QSizeGrip
+    QLabel, QSystemTrayIcon, QMenu, QAction, QPushButton
 )
 
 # Local
@@ -36,7 +36,12 @@ class MainWindow(QMainWindow):
         self.settings_dialog = None
         self.settings_open = False
 
-        # Устанавливаем флаги окна с учетом "поверх всех окон"
+        self._resize_direction = None
+        self._resize_start_pos = None
+        self._resize_start_geo = None
+        self._resize_margin = 12
+        self._is_resizing = False
+
         flags = Qt.FramelessWindowHint | Qt.WindowMinimizeButtonHint
         if self.config.get("ALWAYS_ON_TOP", True):
             flags |= Qt.WindowStaysOnTopHint
@@ -87,18 +92,14 @@ class MainWindow(QMainWindow):
 
         self.start_btn = AnimatedButton("СТАРТ")
         self.start_btn.setObjectName("start_btn")
-        self.start_btn.setFixedSize(100, 40)
         self.start_btn.clicked.connect(self._on_toggle)
         toolbar_layout.addWidget(self.start_btn)
 
         self.settings_btn = AnimatedButton()
         self.settings_btn.set_enable_scale(False)
         self.settings_btn.setObjectName("settings_btn")
-        self.settings_btn.setFixedSize(40, 40)
-        self.settings_btn.setToolTip("Настройки")
-
+        self.settings_btn.setFixedSize(40, 36)
         self.settings_btn.setText("⚙")
-
         self.settings_btn.clicked.connect(self._open_settings)
         toolbar_layout.addWidget(self.settings_btn)
 
@@ -116,24 +117,22 @@ class MainWindow(QMainWindow):
         bottom_bar = QWidget()
         bottom_bar.setObjectName("bottom_bar")
         bottom_bar_layout = QHBoxLayout(bottom_bar)
-        bottom_bar_layout.setContentsMargins(6, 2, 4, 2)
-        bottom_bar_layout.setSpacing(4)
+        bottom_bar_layout.setContentsMargins(8, 4, 8, 4)
+        bottom_bar_layout.setSpacing(0)
 
-        hint_label = QLabel("Измените размер окна здесь")
-        hint_label.setStyleSheet("color: #4a4a6a; font-size: 11px;")
-        bottom_bar_layout.addWidget(hint_label)
+        self.line_count_label = QLabel("0")
+        self.line_count_label.setObjectName("line_count_label")
+        bottom_bar_layout.addWidget(self.line_count_label)
 
         bottom_bar_layout.addStretch()
 
-        resize_icon = QLabel("↘")
-        resize_icon.setStyleSheet("color: #4a4a6a; font-size: 16px;")
-        bottom_bar_layout.addWidget(resize_icon)
-
-        resize_handle = QSizeGrip(self)
-        resize_handle.setObjectName("resize_handle")
-        resize_handle.setFixedSize(16, 16)
-        resize_handle.setToolTip("Потяни меня!")
-        bottom_bar_layout.addWidget(resize_handle)
+        self.clear_btn = QPushButton("Очистить")
+        self.clear_btn.setObjectName("clear_btn")
+        self.clear_btn.setFixedHeight(28)
+        self.clear_btn.setCursor(Qt.PointingHandCursor)
+        self.clear_btn.setToolTip("Очистить лог")
+        self.clear_btn.clicked.connect(self._clear_log)
+        bottom_bar_layout.addWidget(self.clear_btn)
 
         log_container_layout.addWidget(bottom_bar)
         content_layout.addWidget(log_container)
@@ -159,6 +158,19 @@ class MainWindow(QMainWindow):
         self.app.gui = self
 
         self.update_status()
+        self.setMouseTracking(True)
+
+        self._update_line_count()
+
+    def _update_line_count(self):
+        if hasattr(self, 'line_count_label'):
+            count = self.log_widget.line_count
+            self.line_count_label.setText(f"{count}")
+
+    def _clear_log(self):
+        self.log_widget.clear_log()
+        self._update_line_count()
+        self.log("Лог очищен", 'info')
 
     def _open_settings(self):
         if self.app.enabled:
@@ -256,6 +268,7 @@ class MainWindow(QMainWindow):
 
     def _append_text_slot(self, text, tag):
         self.log_widget.append_colored(text, tag)
+        self._update_line_count()
 
     def _auto_save_settings(self):
         pass
@@ -282,7 +295,6 @@ class MainWindow(QMainWindow):
             if self.settings_open:
                 self._close_settings()
 
-            # Блокируем и красим в красный
             self.settings_btn.setEnabled(False)
             self.settings_btn.setToolTip("Настройки недоступны во время работы")
             self.settings_btn.set_color("#ff6b6b")
@@ -299,6 +311,133 @@ class MainWindow(QMainWindow):
             else:
                 self.settings_btn.setEnabled(False)
                 self.settings_btn.setToolTip("Настройки открыты")
+
+    def _get_resize_direction(self, pos):
+        rect = self.rect()
+        margin = self._resize_margin
+        x = pos.x()
+        y = pos.y()
+        width = rect.width()
+        height = rect.height()
+
+        in_left = x <= margin
+        in_right = x >= width - margin
+        in_top = y <= margin
+        in_bottom = y >= height - margin
+
+        if in_left and in_top:
+            return 'lefttop'
+        if in_right and in_top:
+            return 'righttop'
+        if in_left and in_bottom:
+            return 'leftbottom'
+        if in_right and in_bottom:
+            return 'rightbottom'
+        if in_left:
+            return 'left'
+        if in_right:
+            return 'right'
+        if in_top:
+            return 'top'
+        if in_bottom:
+            return 'bottom'
+
+        return None
+
+    def _get_cursor_for_direction(self, direction):
+        if direction == 'left' or direction == 'right':
+            return Qt.SizeHorCursor
+        if direction == 'top' or direction == 'bottom':
+            return Qt.SizeVerCursor
+        if direction in ('lefttop', 'rightbottom'):
+            return Qt.SizeFDiagCursor
+        if direction in ('righttop', 'leftbottom'):
+            return Qt.SizeBDiagCursor
+        return Qt.ArrowCursor
+
+    def _update_cursor(self, pos):
+        if self._is_resizing:
+            return
+
+        direction = self._get_resize_direction(pos)
+        cursor = self._get_cursor_for_direction(direction) if direction else Qt.ArrowCursor
+        self.setCursor(cursor)
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            pos = event.pos()
+
+            if self.title_bar.geometry().contains(pos):
+                super().mousePressEvent(event)
+                return
+
+            direction = self._get_resize_direction(pos)
+            if direction:
+                self._is_resizing = True
+                self._resize_direction = direction
+                self._resize_start_pos = event.globalPos()
+                self._resize_start_geo = self.geometry()
+                return
+
+        super().mousePressEvent(event)
+
+    def mouseMoveEvent(self, event):
+        pos = event.pos()
+
+        if self._is_resizing and self._resize_direction and self._resize_start_pos:
+            delta = event.globalPos() - self._resize_start_pos
+            geo = self._resize_start_geo
+
+            new_x = geo.x()
+            new_y = geo.y()
+            new_w = geo.width()
+            new_h = geo.height()
+
+            direction = self._resize_direction
+
+            if 'left' in direction:
+                new_x = geo.x() + delta.x()
+                new_w = geo.width() - delta.x()
+            elif 'right' in direction:
+                new_w = geo.width() + delta.x()
+
+            if 'top' in direction:
+                new_y = geo.y() + delta.y()
+                new_h = geo.height() - delta.y()
+            elif 'bottom' in direction:
+                new_h = geo.height() + delta.y()
+
+            if new_w < self.minimumWidth():
+                if 'left' in direction:
+                    new_x = geo.x() + geo.width() - self.minimumWidth()
+                new_w = self.minimumWidth()
+
+            if new_h < self.minimumHeight():
+                if 'top' in direction:
+                    new_y = geo.y() + geo.height() - self.minimumHeight()
+                new_h = self.minimumHeight()
+
+            self.setGeometry(new_x, new_y, new_w, new_h)
+            return
+
+        if not self._is_resizing:
+            self._update_cursor(pos)
+
+        super().mouseMoveEvent(event)
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self._is_resizing = False
+            self._resize_direction = None
+            self._resize_start_pos = None
+            self._resize_start_geo = None
+            self._update_cursor(self.mapFromGlobal(self.cursor().pos()))
+        super().mouseReleaseEvent(event)
+
+    def leaveEvent(self, event):
+        if not self._is_resizing:
+            self.setCursor(Qt.ArrowCursor)
+        super().leaveEvent(event)
 
     def closeEvent(self, event):
         if self._closing:
@@ -336,3 +475,8 @@ class MainWindow(QMainWindow):
     def show(self):
         super().show()
         self.update_status()
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        if hasattr(self, 'resize_indicator'):
+            self.resize_indicator.move(self.width() - 30, self.height() - 30)

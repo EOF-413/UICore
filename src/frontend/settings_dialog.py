@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QGridLayout,
     QLabel, QLineEdit, QPushButton, QGroupBox,
     QCheckBox, QSlider, QFrame,
-    QSizeGrip, QWidget, QMessageBox
+    QWidget, QMessageBox
 )
 
 # Local
@@ -24,6 +24,11 @@ class SettingsDialog(QDialog):
         self._save_timer = QTimer()
         self._save_timer.timeout.connect(self._auto_save)
         self._save_timer.start(500)
+
+        self._resize_direction = None
+        self._resize_start_pos = None
+        self._resize_start_geo = None
+        self._resize_margin = 12
 
         self.setWindowFlags(
             Qt.FramelessWindowHint |
@@ -153,27 +158,12 @@ class SettingsDialog(QDialog):
         bottom_bar_layout.setContentsMargins(6, 2, 4, 2)
         bottom_bar_layout.setSpacing(4)
 
-        hint_label = QLabel("Измените размер окна здесь")
-        hint_label.setStyleSheet("color: #4a4a6a; font-size: 11px;")
-        bottom_bar_layout.addWidget(hint_label)
-
-        bottom_bar_layout.addStretch()
-
-        resize_icon = QLabel("↘")
-        resize_icon.setStyleSheet("color: #4a4a6a; font-size: 16px;")
-        bottom_bar_layout.addWidget(resize_icon)
-
-        resize_handle = QSizeGrip(self)
-        resize_handle.setObjectName("resize_handle")
-        resize_handle.setFixedSize(16, 16)
-        resize_handle.setToolTip("Потяни меня!")
-        bottom_bar_layout.addWidget(resize_handle)
-
-        content_layout.addWidget(bottom_bar)
         layout.addWidget(content)
 
         self.hold_edit.textChanged.connect(self._on_setting_changed)
         self.cooldown_edit.textChanged.connect(self._on_setting_changed)
+
+        self.setMouseTracking(True)
 
     def _on_match_changed(self, value):
         self.match_label.setText(f"{value}%")
@@ -240,6 +230,156 @@ class SettingsDialog(QDialog):
             self.top_checkbox.setChecked(self.config["ALWAYS_ON_TOP"])
             self.tray_checkbox.setChecked(self.config["MINIMIZE_TO_TRAY"])
             self._save_config()
+
+    def nativeEvent(self, event, message):
+        if event == "windows_generic_MSG" or event == "windows_event":
+            try:
+                if hasattr(message, 'wParam'):
+                    if message.message == 0x0084:
+                        pos = self.mapFromGlobal(self.cursor().pos())
+                        direction = self._get_resize_direction(pos)
+
+                        if direction == 'lefttop':
+                            return 0, 13
+                        if direction == 'righttop':
+                            return 0, 14
+                        if direction == 'leftbottom':
+                            return 0, 16
+                        if direction == 'rightbottom':
+                            return 0, 17
+                        if direction == 'left':
+                            return 0, 10
+                        if direction == 'right':
+                            return 0, 11
+                        if direction == 'top':
+                            return 0, 12
+                        if direction == 'bottom':
+                            return 0, 15
+            except Exception:
+                pass
+
+        return super().nativeEvent(event, message)
+
+    def _get_resize_direction(self, pos):
+        rect = self.rect()
+        margin = self._resize_margin
+        x = pos.x()
+        y = pos.y()
+        width = rect.width()
+        height = rect.height()
+
+        is_left = x <= margin
+        is_right = x >= width - margin
+        is_top = y <= margin
+        is_bottom = y >= height - margin
+
+        if is_left and is_top:
+            return 'lefttop'
+        if is_right and is_top:
+            return 'righttop'
+        if is_left and is_bottom:
+            return 'leftbottom'
+        if is_right and is_bottom:
+            return 'rightbottom'
+        if is_left:
+            return 'left'
+        if is_right:
+            return 'right'
+        if is_top:
+            return 'top'
+        if is_bottom:
+            return 'bottom'
+
+        return None
+
+    def _get_cursor_for_direction(self, direction):
+        if direction == 'left' or direction == 'right':
+            return Qt.SizeHorCursor
+        if direction == 'top' or direction == 'bottom':
+            return Qt.SizeVerCursor
+        if direction in ('lefttop', 'rightbottom'):
+            return Qt.SizeFDiagCursor
+        if direction in ('righttop', 'leftbottom'):
+            return Qt.SizeBDiagCursor
+        return Qt.ArrowCursor
+
+    def _update_cursor(self, pos):
+        direction = self._get_resize_direction(pos)
+        cursor = self._get_cursor_for_direction(direction) if direction else Qt.ArrowCursor
+        self.setCursor(cursor)
+        return direction
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            pos = event.pos()
+
+            title_bar = self.findChild(CustomTitleBar)
+            if title_bar and title_bar.geometry().contains(pos):
+                super().mousePressEvent(event)
+                return
+
+            direction = self._get_resize_direction(pos)
+            if direction:
+                self._resize_direction = direction
+                self._resize_start_pos = event.globalPos()
+                self._resize_start_geo = self.geometry()
+                return
+
+        super().mousePressEvent(event)
+
+    def mouseMoveEvent(self, event):
+        pos = event.pos()
+
+        if self._resize_direction and self._resize_start_pos:
+            delta = event.globalPos() - self._resize_start_pos
+            geo = self._resize_start_geo
+
+            new_x = geo.x()
+            new_y = geo.y()
+            new_w = geo.width()
+            new_h = geo.height()
+
+            direction = self._resize_direction
+
+            if 'left' in direction:
+                new_x = geo.x() + delta.x()
+                new_w = geo.width() - delta.x()
+            elif 'right' in direction:
+                new_w = geo.width() + delta.x()
+
+            if 'top' in direction:
+                new_y = geo.y() + delta.y()
+                new_h = geo.height() - delta.y()
+            elif 'bottom' in direction:
+                new_h = geo.height() + delta.y()
+
+            if new_w < self.minimumWidth():
+                if 'left' in direction:
+                    new_x = geo.x() + geo.width() - self.minimumWidth()
+                new_w = self.minimumWidth()
+
+            if new_h < self.minimumHeight():
+                if 'top' in direction:
+                    new_y = geo.y() + geo.height() - self.minimumHeight()
+                new_h = self.minimumHeight()
+
+            self.setGeometry(new_x, new_y, new_w, new_h)
+            return
+
+        self._update_cursor(pos)
+        super().mouseMoveEvent(event)
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self._resize_direction = None
+            self._resize_start_pos = None
+            self._resize_start_geo = None
+            self.setCursor(Qt.ArrowCursor)
+        super().mouseReleaseEvent(event)
+
+    def leaveEvent(self, event):
+        self.setCursor(Qt.ArrowCursor)
+        super().leaveEvent(event)
 
     def closeEvent(self, event):
         if not self._is_closing:

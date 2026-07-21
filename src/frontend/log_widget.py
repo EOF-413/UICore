@@ -39,6 +39,13 @@ class LogWidget(QTextEdit):
         self.clear()
         self.line_count = 0
 
+        parent = self.parent()
+        while parent:
+            if hasattr(parent, '_update_line_count'):
+                parent._update_line_count()
+                break
+            parent = parent.parent()
+
     def append_colored(self, text, tag='default'):
         cursor = self.textCursor()
         cursor.movePosition(QTextCursor.End)
