@@ -1,0 +1,39 @@
+QWidget#title_bar {
+    background-color: transparent;
+    border-bottom: 1px solid rgba(45, 45, 74, 0.5);
+}
+
+QLabel#title_label {
+    color: #e8e8f0;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 0 8px;
+}
+
+QPushButton#min_btn,
+QPushButton#close_btn {
+    background-color: transparent;
+    border: none;
+    border-radius: 6px;
+    color: #a8a8c0;
+    font-weight: 300;
+    padding: 0px;
+}
+
+QPushButton#min_btn:hover {
+    background-color: rgba(45, 45, 80, 0.8);
+    color: #e8e8f0;
+}
+
+QPushButton#close_btn:hover {
+    background-color: #e74c3c;
+    color: #ffffff;
+}
+
+QPushButton#min_btn {
+    font-size: 18px;
+}
+
+QPushButton#close_btn {
+    font-size: 14px;
+}

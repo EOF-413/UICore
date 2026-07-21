@@ -1,0 +1,92 @@
+QWidget {
+    --bg-primary: #0f0f1a;
+    --bg-secondary: #1a1a2e;
+    --bg-tertiary: #252540;
+    --bg-hover: #2d2d50;
+    --bg-active: #3d3d6b;
+    
+    --text-primary: #e8e8f0;
+    --text-secondary: #a8a8c0;
+    --text-muted: #6a6a8a;
+    
+    --accent: #6c5ce7;
+    --accent-hover: #7d6ff0;
+    --accent-active: #5a4bd6;
+    
+    --success: #00b894;
+    --warning: #fdcb6e;
+    --error: #ff6b6b;
+    --info: #74b9ff;
+    
+    --border: #2d2d4a;
+    --shadow: rgba(0, 0, 0, 0.4);
+}
+
+QWidget {
+    background-color: #0f0f1a;
+    color: #e8e8f0;
+    font-family: 'Segoe UI', -apple-system, sans-serif;
+    font-size: 13px;
+}
+
+QMainWindow {
+    background-color: #0f0f1a;
+}
+
+QScrollBar:vertical {
+    background: transparent;
+    width: 8px;
+    margin: 0px;
+    border-radius: 4px;
+}
+
+QScrollBar::handle:vertical {
+    background: #3d3d6b;
+    min-height: 30px;
+    border-radius: 4px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background: #4d4d8b;
+}
+
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+    height: 0px;
+}
+
+QScrollBar:horizontal {
+    background: transparent;
+    height: 8px;
+    margin: 0px;
+    border-radius: 4px;
+}
+
+QScrollBar::handle:horizontal {
+    background: #3d3d6b;
+    min-width: 30px;
+    border-radius: 4px;
+}
+
+QScrollBar::handle:horizontal:hover {
+    background: #4d4d8b;
+}
+
+QScrollBar::add-line:horizontal,
+QScrollBar::sub-line:horizontal {
+    width: 0px;
+}
+
+QToolTip {
+    background-color: #1a1a2e;
+    color: #e8e8f0;
+    border: 1px solid #3d3d6b;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 12px;
+}
+
+::selection {
+    background-color: #6c5ce7;
+    color: #ffffff;
+}

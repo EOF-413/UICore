@@ -1,0 +1,162 @@
+QWidget#central_widget {
+    background-color: #1a1a2e;
+    border-radius: 16px;
+    border: 1px solid #2d2d4a;
+}
+
+QWidget#content_widget {
+    background-color: transparent;
+}
+
+QWidget#toolbar {
+    background-color: rgba(37, 37, 64, 0.6);
+    border-radius: 10px;
+    border: 1px solid rgba(45, 45, 74, 0.5);
+    padding: 8px 12px;
+}
+
+QLabel#status_label {
+    color: #a8a8c0;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+QLabel#version_label {
+    color: #4a4a6a;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+AnimatedButton#start_btn {
+    background-color: #6c5ce7;
+    border: none;
+    border-radius: 8px;
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+AnimatedButton#start_btn:hover {
+    background-color: #7d6ff0;
+}
+
+AnimatedButton#start_btn[running="true"] {
+    background-color: #ff6b6b;
+}
+
+AnimatedButton#start_btn[running="true"]:hover {
+    background-color: #ff7a7a;
+}
+
+AnimatedButton#settings_btn {
+    background-color: rgba(108, 92, 231, 0.15);
+    border: 1px solid rgba(45, 45, 74, 0.5);
+    border-radius: 8px;
+    color: #a8a8c0;
+}
+
+AnimatedButton#settings_btn:hover {
+    background-color: rgba(108, 92, 231, 0.3);
+    border-color: #6c5ce7;
+    color: #e8e8f0;
+}
+
+QWidget#log_container {
+    background-color: rgba(15, 15, 26, 0.6);
+    border: 1px solid rgba(45, 45, 74, 0.5);
+    border-radius: 10px;
+    padding: 0px;
+}
+
+QTextEdit#log_area {
+    background-color: transparent;
+    border: none;
+    color: #e8e8f0;
+    font-family: 'Consolas', monospace;
+    font-size: 12px;
+    padding: 12px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+QTextEdit#log_area::selection {
+    background-color: rgba(108, 92, 231, 0.3);
+}
+
+QWidget#bottom_bar {
+    background-color: rgba(15, 15, 26, 0.3);
+    border-top: 1px solid rgba(45, 45, 74, 0.3);
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    height: 28px;
+    padding: 2px 6px;
+}
+
+QWidget#bottom_bar QLabel {
+    color: #4a4a6a;
+    font-size: 11px;
+}
+
+QSizeGrip#resize_handle {
+    background-color: transparent;
+    border: none;
+}
+
+QSizeGrip#resize_handle:hover {
+    background-color: rgba(108, 92, 231, 0.2);
+    border-radius: 4px;
+}
+
+QSizeGrip#resize_handle::handle {
+    background-color: transparent;
+    border: none;
+}
+
+QScrollBar:vertical {
+    background: transparent;
+    width: 8px;
+    margin: 4px;
+    border-radius: 4px;
+}
+
+QScrollBar::handle:vertical {
+    background: #3d3d6b;
+    min-height: 30px;
+    border-radius: 4px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background: #4d4d8b;
+}
+
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+    height: 0px;
+}
+
+QScrollBar::add-page:vertical,
+QScrollBar::sub-page:vertical {
+    background: none;
+}
+
+QScrollBar:horizontal {
+    background: transparent;
+    height: 8px;
+    margin: 4px;
+    border-radius: 4px;
+}
+
+QScrollBar::handle:horizontal {
+    background: #3d3d6b;
+    min-width: 30px;
+    border-radius: 4px;
+}
+
+QScrollBar::handle:horizontal:hover {
+    background: #4d4d8b;
+}
+
+QScrollBar::add-line:horizontal,
+QScrollBar::sub-line:horizontal {
+    width: 0px;
+}

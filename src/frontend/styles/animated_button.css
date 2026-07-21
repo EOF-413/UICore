@@ -1,0 +1,23 @@
+AnimatedButton {
+    border: none;
+    border-radius: 8px;
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+AnimatedButton#start_btn {
+    background-color: #6c5ce7;
+}
+
+AnimatedButton#start_btn:hover {
+    background-color: #7d6ff0;
+}
+
+AnimatedButton#start_btn[running="true"] {
+    background-color: #ff6b6b;
+}
+
+AnimatedButton#start_btn[running="true"]:hover {
+    background-color: #ff7a7a;
+}

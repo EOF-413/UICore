@@ -1,0 +1,145 @@
+QFrame#settings_container {
+    background-color: #1a1a2e;
+    border-radius: 16px;
+    border: 1px solid #2d2d4a;
+}
+
+QWidget#settings_content {
+    background-color: transparent;
+}
+
+QGroupBox {
+    background-color: rgba(26, 26, 46, 0.6);
+    border: 1px solid #2d2d4a;
+    border-radius: 8px;
+    margin-top: 8px;
+    padding-top: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: 10px;
+}
+
+QGroupBox::title {
+    color: #a8a8c0;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 0 8px;
+    left: 10px;
+}
+
+QGroupBox QLabel {
+    color: #a8a8c0;
+    font-size: 12px;
+    min-width: 100px;
+}
+
+QGroupBox QLineEdit {
+    background-color: #0f0f1a;
+    color: #e8e8f0;
+    border: 1px solid #2d2d4a;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 13px;
+}
+
+QGroupBox QLineEdit:focus {
+    border-color: #6c5ce7;
+}
+
+QGroupBox QSlider::groove:horizontal {
+    border: none;
+    height: 4px;
+    background: #2d2d4a;
+    border-radius: 2px;
+}
+
+QGroupBox QSlider::handle:horizontal {
+    background: #6c5ce7;
+    border: none;
+    width: 16px;
+    height: 16px;
+    margin: -6px 0;
+    border-radius: 8px;
+}
+
+QGroupBox QSlider::handle:horizontal:hover {
+    background: #7d6ff0;
+}
+
+QGroupBox QSlider::sub-page:horizontal {
+    background: #6c5ce7;
+    border-radius: 2px;
+}
+
+QLabel#match_value {
+    color: #a8a8c0;
+    min-width: 40px;
+}
+
+QGroupBox QCheckBox {
+    color: #a8a8c0;
+    font-size: 12px;
+}
+
+QGroupBox QCheckBox::indicator {
+    width: 44px;
+    height: 24px;
+    border-radius: 12px;
+    background-color: #3d3d5a;
+    border: 2px solid #3d3d5a;
+}
+
+QGroupBox QCheckBox::indicator:checked {
+    background-color: #6c5ce7;
+    border: 2px solid #6c5ce7;
+}
+
+QGroupBox QCheckBox::indicator:hover {
+    background-color: #4d4d6a;
+    border: 2px solid #4d4d6a;
+}
+
+QGroupBox QCheckBox::indicator:checked:hover {
+    background-color: #7d6ff0;
+    border: 2px solid #7d6ff0;
+}
+
+QGroupBox QCheckBox::indicator:disabled {
+    background-color: #2d2d4a;
+    border: 2px solid #2d2d4a;
+}
+
+QPushButton#reset_btn {
+    background-color: transparent;
+    color: #ff6b6b;
+    border: 1px solid #e74c3c;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-weight: 600;
+}
+
+QPushButton#reset_btn:hover {
+    background-color: rgba(231, 76, 60, 0.1);
+}
+
+QWidget#settings_bottom_bar {
+    background-color: transparent;
+    border-top: 1px solid rgba(45, 45, 74, 0.3);
+    height: 28px;
+    padding: 2px 6px;
+}
+
+QSizeGrip#resize_handle {
+    background-color: transparent;
+    border: none;
+}
+
+QSizeGrip#resize_handle:hover {
+    background-color: rgba(108, 92, 231, 0.2);
+    border-radius: 4px;
+}
+
+QSizeGrip#resize_handle::handle {
+    background-color: transparent;
+    border: none;
+}
